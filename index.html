@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Water Trapped Visualizer</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+      }
+
+      #container {
+        text-align: center;
+      }
+
+      svg {
+        border: 1px solid #ccc;
+      }
+      #visualization {
+        margin: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <h1>Water Trapped Visualizer</h1>
+      <label for="inputArray"
+        >Enter building heights (separated by spaces):</label
+      >
+      <input
+        type="text"
+        id="inputArray"
+        placeholder="e.g., 0 4 0 0 0 6 0 6 4 0"
+      />
+      <button onclick="calculateAndVisualize()">Visualize</button>
+      <div id="output"></div>
+      <svg id="visualization" width="400" height="200"></svg>
+    </div>
+
+    <script>
+      function calculateAndVisualize() {
+        var input = document.getElementById("inputArray").value;
+        input = input.split(" ");
+        var len = input.length;
+        var buildingHeights = new Array(len);
+        var maxLeft = new Array(len);
+        var maxRight = new Array(len);
+        var waterStored = 0;
+
+        for (let i = 0; i < len; i++) {
+          buildingHeights[i] = parseInt(input[i]);
+        }
+
+        maxLeft[0] = buildingHeights[0];
+        maxRight[len - 1] = buildingHeights[len - 1];
+
+        for (var i = 1; i < len; i++) {
+          maxLeft[i] = Math.max(maxLeft[i - 1], buildingHeights[i]);
+        }
+
+        for (var i = len - 2; i >= 0; i--) {
+          maxRight[i] = Math.max(maxRight[i + 1], buildingHeights[i]);
+        }
+
+        for (var i = 0; i < len; i++) {
+          buildingHeights[i] =
+            Math.min(maxLeft[i], maxRight[i]) - buildingHeights[i];
+          waterStored += buildingHeights[i];
+        }
+        document.getElementById("output").innerHTML =
+          "Water Trapped: " + waterStored + " Units";
+        visualize(buildingHeights);
+      }
+
+      function visualize(buildingHeights) {
+        var svg = document.getElementById("visualization");
+        svg.innerHTML = "";
+
+        var barWidth = 30;
+        var maxHeight = Math.max(...buildingHeights);
+        var heightScale = 150 / maxHeight;
+
+        for (var i = 0; i < buildingHeights.length; i++) {
+          var rectHeight = buildingHeights[i] * heightScale;
+          var x = i * (barWidth + 5);
+          var y = 200 - rectHeight;
+
+          var rect = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "rect"
+          );
+          rect.setAttribute("x", x);
+          rect.setAttribute("y", y);
+          rect.setAttribute("width", barWidth);
+          rect.setAttribute("height", rectHeight);
+          rect.setAttribute("fill", "#3498db");
+
+          svg.appendChild(rect);
+        }
+      }
+    </script>
+  </body>
+</html>
